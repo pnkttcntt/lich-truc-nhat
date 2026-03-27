@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Trực Nhật Cơ Quan</title>
+    <style>
+        body { font-family: "Times New Roman", Times, serif; margin: 20px; background-color: #f4f7f6; font-size: 13px; }
+        .container { max-width: 1050px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; font-size: 20px; text-transform: uppercase; }
+        
+        /* Cấu hình bảng hiển thị */
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { border-collapse: collapse; width: 100%; font-size: 13px; font-family: "Times New Roman", Times, serif; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: center; height: 25px; user-select: none; }
+        th { background-color: #f2f2f2; }
+        .weekend { background-color: #9bc2e6; } 
+        .holiday { background-color: #f4b084; } 
+        .missed { background-color: #f8d7da; color: #dc3545; }
+        .name-col { text-align: left; font-weight: bold; white-space: nowrap; padding-left: 10px; }
+        .empty-msg { text-align: center; color: #dc3545; font-size: 16px; margin-top: 30px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>BẢNG PHÂN CÔNG TRỰC NHẬT</h2>
+    <div style="text-align: center; margin-bottom: 20px; color: #555;">
+        <i>(Chỉ xem - Vui lòng liên hệ Admin nếu có sai sót)</i>
+    </div>
+    
+    <div class="table-container" id="output">
+        </div>
+</div>
+
+<script>
+    const STORAGE_KEY = 'trucNhatDataV2';
+
+    window.onload = function() {
+        let allData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        
+        // Lấy thời gian thực tế hiện tại
+        let today = new Date();
+        let currentMonth = today.getMonth() + 1; // Trong JS, tháng bắt đầu từ 0 nên phải +1
+        let currentYear = today.getFullYear();
+        
+        // Tạo khóa ID theo chuẩn (VD: 2026-03)
+        let currentId = `${currentYear}-${currentMonth.toString().padStart(2, '0')}`;
+        
+        // Tìm xem Admin đã tạo lịch cho tháng hiện tại chưa
+        if (allData[currentId]) {
+            renderReadOnlyTable(allData[currentId]);
+        } else {
+            // Nếu chưa có, hiện thông báo
+            document.getElementById('output').innerHTML = `<div class='empty-msg'>Hiện tại chưa có dữ liệu lịch trực nhật cho Tháng ${currentMonth}/${currentYear}.</div>`;
+        }
+    };
+
+    function renderReadOnlyTable(data) {
+        const { month, year, names, daysInMonth, isWeekend, isHoliday, assignments, missed } = data;
+        
+        let html = `<table>`;
+        html += `<tr><th colspan="${daysInMonth + 1}" style="font-size: 16px; padding: 10px; text-transform: uppercase;">BẢNG PHÂN CÔNG TRỰC NHẬT THÁNG ${month}/${year}</th></tr>`;
+        
+        html += `<tr><th rowspan="2" class="name-col" style="width: 200px;">Họ và tên</th>`;
+        for (let i = 1; i <= daysInMonth; i++) html += `<th>${i < 10 ? '0'+i : i}</th>`;
+        html += `</tr><tr>`;
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            let day = new Date(year, month - 1, i).getDay();
+            let dayStr = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][day];
+            let bgClass = isHoliday[i] ? 'class="holiday"' : (isWeekend[i] ? 'class="weekend"' : '');
+            html += `<th ${bgClass}>${dayStr}</th>`;
+        }
+        html += `</tr>`;
+
+        names.forEach(name => {
+            html += `<tr><td class="name-col">${name}</td>`;
+            for (let i = 1; i <= daysInMonth; i++) {
+                let tdClass = '';
+                if (isHoliday[i]) tdClass = 'holiday';
+                else if (isWeekend[i]) tdClass = 'weekend';
+
+                let isAssigned = assignments[name] && assignments[name][i];
+                let isMissed = missed[name] && missed[name][i];
+                let mark = '';
+
+                if (isAssigned) {
+                    let textMark = isMissed ? 'Vắng' : 'X';
+                    tdClass += isMissed ? ' missed' : '';
+                    mark = `<b>${textMark}</b>`;
+                }
+
+                // Trang này không có sự kiện onclick để sửa
+                html += `<td class="${tdClass.trim()}">${mark}</td>`;
+            }
+            html += `</tr>`;
+        });
+
+        html += `</table>`;
+        document.getElementById('output').innerHTML = html;
+    }
+</script>
+
+</body>
+</html>
