@@ -131,7 +131,7 @@ Hoàng Hải Hưng</textarea>
     function handleLoginKeyPress(e) { if (e.key === 'Enter') verifyLogin(); }
     function verifyLogin() {
         let inputPass = document.getElementById('admin-pass-input').value;
-        let correctPass = localStorage.getItem(PASS_KEY) || 'admin123';
+        let correctPass = localStorage.getItem(PASS_KEY) || 'Den.1309@';
         if (inputPass === correctPass) { sessionStorage.setItem('isAdminLoggedIn', 'true'); showAdminWorkspace(); }
         else { alert('❌ Sai mật khẩu!'); }
     }
