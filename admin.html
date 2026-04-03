@@ -137,7 +137,7 @@ Hoàng Hải Hưng</textarea>
     }
     function logoutAdmin() { sessionStorage.removeItem('isAdminLoggedIn'); location.reload(); }
     function changePassword() {
-        let currentCorrectPass = localStorage.getItem(PASS_KEY) || 'admin123';
+        let currentCorrectPass = localStorage.getItem(PASS_KEY) || 'Den.1309@';
         let oldPass = prompt('Nhập mật khẩu HIỆN TẠI:'); if (oldPass === null) return;
         if (oldPass !== currentCorrectPass) { alert('❌ Sai!'); return; }
         let newPass = prompt('Nhập mật khẩu MỚI:'); if (!newPass) return;
